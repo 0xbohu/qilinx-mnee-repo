@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, network } = body;
 
     if (!name || typeof name !== 'string') {
       return Response.json(
@@ -55,10 +55,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate network if provided
+    const walletNetwork = network === 'mainnet' ? 'mainnet' : 'sandbox';
+
     const result = await merchantWalletService.createMerchantWallet(
       session.user.id,
       name,
-      description
+      description,
+      walletNetwork
     );
 
     if (!result.success) {

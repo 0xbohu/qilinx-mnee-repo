@@ -14,12 +14,20 @@ export default async function AccountPage() {
     redirect("/login");
   }
 
-  // Fetch wallet info server-side
+  // Fetch sandbox wallet info server-side
   let walletInfo = null;
   try {
     walletInfo = await userWalletService.getWalletInfo(session.user.id);
   } catch (error) {
     console.error("Failed to fetch wallet info:", error);
+  }
+
+  // Fetch production wallet info server-side
+  let productionWalletInfo = null;
+  try {
+    productionWalletInfo = await userWalletService.getProductionWalletInfo(session.user.id);
+  } catch (error) {
+    console.error("Failed to fetch production wallet info:", error);
   }
 
   // Fetch user's API token
@@ -67,8 +75,11 @@ export default async function AccountPage() {
           </div>
         </div>
 
-        {/* Wallet Section */}
-        <WalletCard wallet={walletInfo} />
+        {/* Sandbox Wallet Section */}
+        <WalletCard wallet={walletInfo} variant="sandbox" />
+
+        {/* Production Wallet Section */}
+        <WalletCard wallet={productionWalletInfo} variant="production" />
 
         {/* API Token Section */}
         <ApiTokenCard apiToken={apiToken} />
