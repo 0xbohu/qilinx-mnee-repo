@@ -15,6 +15,8 @@ export interface UseSpeechRecognitionReturn {
   isSupported: boolean;
   startListening: () => Promise<void>;
   stopListening: () => void;
+  pauseListening: () => void;
+  resumeListening: () => void;
   resetTranscript: () => void;
 }
 
@@ -152,6 +154,30 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     setInterimTranscript("");
   }, []);
 
+  const pauseListening = useCallback(() => {
+    // Temporarily stop recognition without clearing the ref
+    // This prevents picking up TTS audio as user input
+    if (recognitionRef.current) {
+      shouldRestartRef.current = false; // Prevent auto-restart
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+    setInterimTranscript("");
+  }, []);
+
+  const resumeListening = useCallback(() => {
+    // Resume recognition after TTS playback
+    if (recognitionRef.current) {
+      shouldRestartRef.current = true;
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        // Ignore if already started or other issues
+        console.warn("Could not resume speech recognition:", e);
+      }
+    }
+  }, []);
+
   const resetTranscript = useCallback(() => {
     setTranscript("");
     setInterimTranscript("");
@@ -176,6 +202,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     isSupported,
     startListening,
     stopListening,
+    pauseListening,
+    resumeListening,
     resetTranscript,
   };
 }

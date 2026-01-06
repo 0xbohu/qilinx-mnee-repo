@@ -41,6 +41,8 @@ export function VoiceAgentClient({ userId }: VoiceAgentClientProps) {
     isSupported,
     startListening,
     stopListening,
+    pauseListening,
+    resumeListening,
     resetTranscript,
   } = useSpeechRecognition();
 
@@ -151,10 +153,19 @@ export function VoiceAgentClient({ userId }: VoiceAgentClientProps) {
       // Convert to speech - with fallback to text display
       setIsProcessing(false);
       try {
+        // Pause speech recognition while TTS is playing to avoid picking up the audio
+        pauseListening();
         await speak(responseText);
+        // Resume listening after TTS completes
+        if (isConnectedRef.current) {
+          resumeListening();
+        }
       } catch (ttsError) {
         console.error("TTS failed, showing text response:", ttsError);
-        // Text is already displayed via lastResponse, so this is graceful degradation
+        // Resume listening even if TTS fails
+        if (isConnectedRef.current) {
+          resumeListening();
+        }
       }
       
       // Reset transcript after speaking
@@ -169,9 +180,16 @@ export function VoiceAgentClient({ userId }: VoiceAgentClientProps) {
       
       // Try to speak the error message
       try {
+        pauseListening();
         await speak("Sorry, I encountered an error. Please try again.");
+        if (isConnectedRef.current) {
+          resumeListening();
+        }
       } catch {
-        // Silently fail TTS for error message
+        // Silently fail TTS for error message, but still resume listening
+        if (isConnectedRef.current) {
+          resumeListening();
+        }
       }
     }
   };
