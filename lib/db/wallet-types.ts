@@ -52,6 +52,7 @@ export interface WalletConfig {
   version: number; // Schema version for migrations
   wallets: {
     mnee?: MneeWallet;
+    mneeProduction?: MneeWallet;
     ethereum?: EthWallet;
     solana?: SolanaWallet;
   };
@@ -73,10 +74,16 @@ export function hasWallet(config: WalletConfig | null, type: WalletType): boolea
   return !!config.wallets[type];
 }
 
-// Helper to get MNEE wallet from config
+// Helper to get MNEE wallet from config (sandbox)
 export function getMneeWallet(config: WalletConfig | null): MneeWallet | null {
   if (!config) return null;
   return config.wallets.mnee || null;
+}
+
+// Helper to get MNEE production wallet from config
+export function getMneeProductionWallet(config: WalletConfig | null): MneeWallet | null {
+  if (!config) return null;
+  return config.wallets.mneeProduction || null;
 }
 
 // Helper to check if faucet can be requested (24 hour cooldown)

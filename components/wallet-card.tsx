@@ -7,16 +7,19 @@ import { toast } from "./toast";
 import { LoaderIcon } from "./icons";
 import { QRCodeGenerator } from "./qr-code-generator";
 
-interface WalletCardProps {
-  wallet: {
-    address: string;
-    balance: string;
-    canRequestFaucet?: boolean;
-    timeUntilFaucet?: string | null;
-  } | null;
+interface WalletInfo {
+  address: string;
+  balance: string;
+  canRequestFaucet?: boolean;
+  timeUntilFaucet?: string | null;
 }
 
-export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
+interface WalletCardProps {
+  wallet: WalletInfo | null;
+  variant?: 'sandbox' | 'production';
+}
+
+export function WalletCard({ wallet: initialWallet, variant = 'sandbox' }: WalletCardProps) {
   const [wallet, setWallet] = useState(initialWallet);
   const [isCreating, setIsCreating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,6 +28,9 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  const isProduction = variant === 'production';
+  const apiBasePath = isProduction ? '/api/wallet/production' : '/api/wallet';
 
   // Generate inline QR code when wallet address is available
   useEffect(() => {
@@ -51,19 +57,19 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
   const handleCreateWallet = async () => {
     setIsCreating(true);
     try {
-      const response = await fetch("/api/wallet", {
+      const response = await fetch(apiBasePath, {
         method: "POST",
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create wallet");
+        throw new Error(error.message || `Failed to create ${variant} wallet`);
       }
 
       const data = await response.json();
       
       // Fetch full wallet info after creation
-      const walletResponse = await fetch("/api/wallet");
+      const walletResponse = await fetch(apiBasePath);
       if (walletResponse.ok) {
         const walletData = await walletResponse.json();
         setWallet(walletData.wallet);
@@ -71,12 +77,12 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
 
       toast({
         type: "success",
-        description: `Wallet created: ${data.address.slice(0, 8)}...`,
+        description: `${isProduction ? 'Production' : 'Sandbox'} wallet created: ${data.address.slice(0, 8)}...`,
       });
     } catch (error) {
       toast({
         type: "error",
-        description: error instanceof Error ? error.message : "Failed to create wallet",
+        description: error instanceof Error ? error.message : `Failed to create ${variant} wallet`,
       });
     } finally {
       setIsCreating(false);
@@ -88,13 +94,16 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
     
     setIsRefreshing(true);
     try {
-      const response = await fetch("/api/wallet/balance");
+      const response = await fetch(isProduction ? '/api/wallet/production' : '/api/wallet/balance');
       if (response.ok) {
         const data = await response.json();
-        setWallet({
-          ...wallet,
-          balance: data.balance.toFixed(5),
-        });
+        const balance = isProduction ? data.wallet?.balance : data.balance?.toFixed(5);
+        if (balance !== undefined) {
+          setWallet({
+            ...wallet,
+            balance: typeof balance === 'number' ? balance.toFixed(5) : balance,
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to refresh balance:", error);
@@ -245,17 +254,30 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
     }
   };
 
+  const variantLabel = isProduction ? 'Production' : 'Sandbox';
+  const variantBadgeClass = isProduction 
+    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+
   if (!wallet) {
     return (
       <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-semibold mb-2">MNEE Wallet</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-lg font-semibold">MNEE Wallet</h3>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${variantBadgeClass}`}>
+            {variantLabel}
+          </span>
+        </div>
         <p className="text-muted-foreground mb-4">
-          Create a sandbox MNEE wallet to enable token operations through the AI assistant.
+          {isProduction 
+            ? "Create a production MNEE wallet for real token operations."
+            : "Create a sandbox MNEE wallet to enable token operations through the AI assistant."
+          }
         </p>
         <Button 
           onClick={handleCreateWallet} 
           disabled={isCreating}
-          data-testid="create-wallet-button"
+          data-testid={`create-${variant}-wallet-button`}
         >
           {isCreating ? (
             <>
@@ -265,7 +287,7 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
               Creating...
             </>
           ) : (
-            "Create Wallet"
+            `Create ${variantLabel} Wallet`
           )}
         </Button>
       </div>
@@ -274,7 +296,12 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
 
   return (
     <div className="rounded-lg border bg-card p-6">
-      <h3 className="text-lg font-semibold mb-4">MNEE Wallet</h3>
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-lg font-semibold">MNEE Wallet</h3>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${variantBadgeClass}`}>
+          {variantLabel}
+        </span>
+      </div>
       
       <div className="space-y-4">
         <div className="flex gap-4">
@@ -285,7 +312,7 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
               className="rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setShowQRModal(true)}
               title="Click to enlarge"
-              data-testid="wallet-qr-code"
+              data-testid={`${variant}-wallet-qr-code`}
             />
             <p className="text-xs text-muted-foreground text-center mt-1">
               Click to enlarge
@@ -298,7 +325,7 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
               <label className="text-sm text-muted-foreground">Address</label>
               <p 
                 className="font-mono text-xs break-all bg-muted p-2 rounded mt-1"
-                data-testid="wallet-address"
+                data-testid={`${variant}-wallet-address`}
               >
                 {wallet.address}
               </p>
@@ -309,7 +336,7 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
               <div className="flex items-center gap-2 mt-1">
                 <p 
                   className="text-2xl font-bold"
-                  data-testid="wallet-balance"
+                  data-testid={`${variant}-wallet-balance`}
                 >
                   {wallet.balance} MNEE
                 </p>
@@ -333,44 +360,50 @@ export function WalletCard({ wallet: initialWallet }: WalletCardProps) {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          This is a MNEE Sandbox wallet. Only send sandbox MNEE tokens to this address.
+          {isProduction 
+            ? "This is a MNEE Production wallet. Only send real MNEE tokens to this address."
+            : "This is a MNEE Sandbox wallet. Only send sandbox MNEE tokens to this address."
+          }
         </p>
 
-        <div className="pt-2 border-t">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleRequestFaucet}
-            disabled={isRequestingFaucet || wallet.canRequestFaucet === false}
-            className="w-full"
-            data-testid="request-faucet-button"
-          >
-            {isRequestingFaucet ? (
-              <>
-                <span className="animate-spin mr-2">
-                  <LoaderIcon />
-                </span>
-                {faucetStatus || "Requesting..."}
-              </>
-            ) : wallet.canRequestFaucet === false ? (
-              `Faucet available in ${wallet.timeUntilFaucet}`
-            ) : (
-              "Request Faucet Tokens"
-            )}
-          </Button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            {wallet.canRequestFaucet === false 
-              ? "Faucet can be requested once every 24 hours"
-              : "Connect with MNEE developer account to automatically request faucet tokens"
-            }
-          </p>
-        </div>
+        {/* Faucet section - only for sandbox */}
+        {!isProduction && (
+          <div className="pt-2 border-t">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleRequestFaucet}
+              disabled={isRequestingFaucet || wallet.canRequestFaucet === false}
+              className="w-full"
+              data-testid="request-faucet-button"
+            >
+              {isRequestingFaucet ? (
+                <>
+                  <span className="animate-spin mr-2">
+                    <LoaderIcon />
+                  </span>
+                  {faucetStatus || "Requesting..."}
+                </>
+              ) : wallet.canRequestFaucet === false ? (
+                `Faucet available in ${wallet.timeUntilFaucet}`
+              ) : (
+                "Request Faucet Tokens"
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              {wallet.canRequestFaucet === false 
+                ? "Faucet can be requested once every 24 hours"
+                : "Connect with MNEE developer account to automatically request faucet tokens"
+              }
+            </p>
+          </div>
+        )}
       </div>
 
       {/* QR Code Modal */}
       <QRCodeGenerator
         address={wallet.address}
-        merchantName="My Wallet"
+        merchantName={`My ${variantLabel} Wallet`}
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
       />

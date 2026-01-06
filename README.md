@@ -1,71 +1,56 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
-</a>
+# Overview
 
-<p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
-</p>
+Welcome to the Qilinx MNEE platform documentation. Qilinx is an autonomous agent platform for MNEE ecosystem, with build in tools for users and developer to access both BSV and Ethereum chains.
 
-<p align="center">
-  <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a>
-</p>
-<br/>
+**Live Demo:** [https://qilinx-mnee-dashboard.vercel.app/](https://qilinx-mnee-dashboard.vercel.app/)
 
-## Features
+<figure><img src="https://1192796973-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FnjX1SqrLbXMbnnif6JRT%2Fuploads%2FogAjFTIzg42J8yvAoadT%2FScreenshot%202026-01-05%20at%206.46.22%E2%80%AFPM.png?alt=media&#x26;token=87e6a482-a241-4e7f-b1f9-3aaf045fe2ad" alt=""><figcaption></figcaption></figure>
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports xAI (default), OpenAI, Fireworks, and other model providers
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+## Applications
 
-## Model Providers
+Qilinx solution includes three applications
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default configuration includes [xAI](https://x.ai) models (`grok-2-vision-1212`, `grok-3-mini`) routed through the gateway.
+<table><thead><tr><th>Application</th><th>Url</th><th width="306.1953125">Desc</th><th>Github</th></tr></thead><tbody><tr><td><strong>Qilinx MNEE Dashboard</strong></td><td><a href="https://qilinx-mnee-dashboard.vercel.app/">https://qilinx-mnee-dashboard.vercel.app</a></td><td>Dashboard application for user and developers to access autonomous agents, chats, wallets and building tools</td><td><a href="https://github.com/0xbohu/qilinx-mnee-repo/">https://github.com/0xbohu/qilinx-mnee-repo/</a></td></tr><tr><td><strong>Qilinx MNEE MCP Server</strong></td><td><a href="https://qilin-mcp-mnee.vercel.app/api/mcp">https://qilin-mcp-mnee.vercel.app/api/mcp</a></td><td><p></p><p>MCP server for interacting with MNEE BSV wallets and activities</p><p></p></td><td><a href="https://github.com/0xbohu/qilinx-mcp-mnee-repo/">https://github.com/0xbohu/qilinx-mcp-mnee-repo/</a></td></tr><tr><td><strong>Qilin MNEE Payemnt Gateway</strong></td><td><a href="https://mnee-payment-gateway.vercel.app/">https://mnee-payment-gateway.vercel.app/</a></td><td>A payment-as-service Middleware application for external system to integrate with MNEE Ethereum Payment contracts to accept MNEE token as onchain payment </td><td><a href="https://github.com/0xbohu/qilinx-mnee-payment-repo/">https://github.com/0xbohu/qilinx-mnee-payment-repo/</a></td></tr></tbody></table>
 
-### AI Gateway Authentication
+## Key Technologies
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+* **MNEE Token** - The native token used across the platform for payments and DeFi operations, support both Mainnet and Sepolia testnet on Ethereum, BSV chain productin and sandbox environment
+* **Vercel SDK/AI-SDK/AI Elements:** For building applications, chats and agents UI and backend services
+* **Neon PostgreSQL Database**: for relational database, authentication
+* **MCP (Model Context Protocol)** - Enables external tool integration with the AI chat
+* **Web3 Wallet integration** - Ethereum wallet integration for contract deployment and DApp interactions
+* **Gemini 3 models** - Google Gemini 3 models power the conversational AI and autonomous agent capabilities, enable logical thinking and decision making of AI agents
+* **Redis** - caching services
+* **Vercel Blob Storage** - storing unstructured data
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+## Smart Contracts
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+Mainnet [MNEE Token](https://etherscan.io/token/0x8ccedbae4916b79da7f3f612efb2eb93a2bfd6cf?a=0x4240781a9ebdb2eb14a183466e8820978b7da4e2#code) Contract by MNEE team
 
-## Deploy Your Own
-
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/nextjs-ai-chatbot)
-
-## Running locally
-
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
-
-```bash
-pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
-pnpm dev
+```
+# MNEE Ethereum Mainnet Contract
+0x772DDa9B82c99Dd9F4d47ACBe2405F89A1440509
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+Below Sepolia Testnet contracts are created by Qilinx team for testing purpose
+
+Sepolia [Testnet MNEE Token](https://sepolia.etherscan.io/address/0x772DDa9B82c99Dd9F4d47ACBe2405F89A1440509#code) Contract
+
+```
+# MNEE Sepolia Testnet Contract
+0x772DDa9B82c99Dd9F4d47ACBe2405F89A1440509
+```
+
+Sepolia Testnet [Payment Contract](https://sepolia.etherscan.io/address/0x587cc79827DCB69d73E9e2d776fCadd0a1A66559#code)
+
+```
+# Sepolia Testnet Payment Contract
+0x587cc79827DCB69d73E9e2d776fCadd0a1A66559
+```
+
+Sepolia Testnet [Staking Contract](https://sepolia.etherscan.io/tx/0x2b58372a0a6c528f68f026655871c87166d8eb5567dd42db3bc5b0c25e0a0648)
+
+```
+# Sepolia Testnet Payment Contract
+0x2b58372a0a6c528f68f026655871c87166d8eb5567dd42db3bc5b0c25e0a0648
+```

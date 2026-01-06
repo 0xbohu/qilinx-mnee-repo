@@ -1097,16 +1097,7 @@ interface SpeechRecognitionErrorEvent extends Event {
   error: string;
 }
 
-declare global {
-  interface Window {
-    SpeechRecognition: {
-      new (): SpeechRecognition;
-    };
-    webkitSpeechRecognition: {
-      new (): SpeechRecognition;
-    };
-  }
-}
+// Note: SpeechRecognition types are declared in types/speech-recognition.d.ts
 
 export type PromptInputSpeechButtonProps = ComponentProps<
   typeof PromptInputButton
@@ -1134,6 +1125,9 @@ export const PromptInputSpeechButton = ({
     ) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) return;
+      
       const speechRecognition = new SpeechRecognition();
 
       speechRecognition.continuous = true;
@@ -1148,7 +1142,7 @@ export const PromptInputSpeechButton = ({
         setIsListening(false);
       };
 
-      speechRecognition.onresult = (event) => {
+      speechRecognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -1170,7 +1164,7 @@ export const PromptInputSpeechButton = ({
         }
       };
 
-      speechRecognition.onerror = (event) => {
+      speechRecognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };

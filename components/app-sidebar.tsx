@@ -16,6 +16,7 @@ import {
   BotIcon,
   FileIcon,
   CreditCardIcon,
+  MicIcon,
 } from "@/components/icons";
 import {
   getChatHistoryPaginationKey,
@@ -54,6 +55,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
+  { title: "Voice Agent", href: "/voice-agent", icon: MicIcon },
 ];
 
 const chatNavItems: NavItem[] = [

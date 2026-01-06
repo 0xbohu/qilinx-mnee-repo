@@ -9,7 +9,7 @@ import { WalletGenerator } from './wallet-generator';
 import { createTransferService } from './transfer-service';
 import { formatMneeAmount } from './amount-utils';
 import type { WalletConfig, MneeWallet } from '@/lib/db/wallet-types';
-import { getMneeWallet, createEmptyWalletConfig, canRequestFaucet, getTimeUntilFaucet } from '@/lib/db/wallet-types';
+import { getMneeWallet, getMneeProductionWallet, createEmptyWalletConfig, canRequestFaucet, getTimeUntilFaucet } from '@/lib/db/wallet-types';
 
 // biome-ignore lint: Forbidden non-null assertion.
 const client = postgres(process.env.POSTGRES_URL!);
@@ -29,7 +29,7 @@ export interface UserWalletWithKey {
 
 export class UserWalletService {
   /**
-   * Creates a new MNEE wallet for a user
+   * Creates a new MNEE sandbox wallet for a user
    */
   async createWallet(userId: string): Promise<{ address: string }> {
     // Check if user already has a wallet
@@ -37,7 +37,7 @@ export class UserWalletService {
     const existingWallet = getMneeWallet(existingUser?.walletConfig || null);
     
     if (existingWallet) {
-      throw new Error('User already has an MNEE wallet');
+      throw new Error('User already has an MNEE sandbox wallet');
     }
 
     // Generate new BSV wallet
@@ -59,6 +59,45 @@ export class UserWalletService {
     
     walletConfig.wallets.mnee = mneeWallet;
     walletConfig.defaultWallet = 'mnee';
+
+    await db
+      .update(user)
+      .set({ walletConfig })
+      .where(eq(user.id, userId));
+
+    return { address: wallet.address };
+  }
+
+  /**
+   * Creates a new MNEE production wallet for a user
+   */
+  async createProductionWallet(userId: string): Promise<{ address: string }> {
+    // Check if user already has a production wallet
+    const existingUser = await this.getUser(userId);
+    const existingWallet = getMneeProductionWallet(existingUser?.walletConfig || null);
+    
+    if (existingWallet) {
+      throw new Error('User already has an MNEE production wallet');
+    }
+
+    // Generate new BSV wallet
+    const wallet = WalletGenerator.generate();
+    
+    // Encrypt the private key for storage
+    const encryptedKey = encryptPrivateKey(wallet.privateKeyHex);
+
+    // Create wallet config
+    const walletConfig: WalletConfig = existingUser?.walletConfig || createEmptyWalletConfig();
+    
+    const mneeWallet: MneeWallet = {
+      type: 'mnee',
+      network: 'mainnet',
+      address: wallet.address,
+      encryptedPrivateKey: encryptedKey,
+      createdAt: new Date().toISOString(),
+    };
+    
+    walletConfig.wallets.mneeProduction = mneeWallet;
 
     await db
       .update(user)
@@ -94,6 +133,33 @@ export class UserWalletService {
       balance,
       canRequestFaucet: canRequestFaucet(foundUser?.walletConfig || null),
       timeUntilFaucet: getTimeUntilFaucet(foundUser?.walletConfig || null),
+    };
+  }
+
+  /**
+   * Gets user production wallet info
+   */
+  async getProductionWalletInfo(userId: string): Promise<Omit<UserWalletInfo, 'canRequestFaucet' | 'timeUntilFaucet'> | null> {
+    const foundUser = await this.getUser(userId);
+    const mneeWallet = getMneeProductionWallet(foundUser?.walletConfig || null);
+    
+    if (!mneeWallet) {
+      return null;
+    }
+
+    // Get balance from MNEE API (mainnet)
+    let balance = '0.00000';
+    try {
+      const transferService = createTransferService('production');
+      const balanceInfo = await transferService.getBalance(mneeWallet.address);
+      balance = formatMneeAmount(balanceInfo.decimalAmount);
+    } catch (e) {
+      console.error('Failed to fetch user production wallet balance:', e);
+    }
+
+    return {
+      address: mneeWallet.address,
+      balance,
     };
   }
 

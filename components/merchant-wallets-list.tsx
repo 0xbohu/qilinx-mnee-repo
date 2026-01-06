@@ -25,6 +25,7 @@ interface MerchantWallet {
   address: string;
   balance: string;
   createdAt: string;
+  network: 'sandbox' | 'mainnet';
 }
 
 export function MerchantWalletsList() {
@@ -34,6 +35,7 @@ export function MerchantWalletsList() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newWalletName, setNewWalletName] = useState("");
   const [newWalletDescription, setNewWalletDescription] = useState("");
+  const [newWalletNetwork, setNewWalletNetwork] = useState<'sandbox' | 'mainnet'>('sandbox');
   const [qrWallet, setQrWallet] = useState<MerchantWallet | null>(null);
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export function MerchantWalletsList() {
         body: JSON.stringify({
           name: newWalletName.trim(),
           description: newWalletDescription.trim(),
+          network: newWalletNetwork,
         }),
       });
 
@@ -84,6 +87,7 @@ export function MerchantWalletsList() {
       setShowCreateDialog(false);
       setNewWalletName("");
       setNewWalletDescription("");
+      setNewWalletNetwork('sandbox');
 
       toast({
         type: "success",
@@ -205,6 +209,38 @@ export function MerchantWalletsList() {
               />
               <p className="text-xs text-muted-foreground">
                 {newWalletDescription.length}/500 characters
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Network</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={newWalletNetwork === 'sandbox' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewWalletNetwork('sandbox')}
+                  className="flex-1"
+                >
+                  <span className={`mr-2 inline-block w-2 h-2 rounded-full ${newWalletNetwork === 'sandbox' ? 'bg-yellow-400' : 'bg-yellow-400/50'}`} />
+                  Sandbox
+                </Button>
+                <Button
+                  type="button"
+                  variant={newWalletNetwork === 'mainnet' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewWalletNetwork('mainnet')}
+                  className="flex-1"
+                >
+                  <span className={`mr-2 inline-block w-2 h-2 rounded-full ${newWalletNetwork === 'mainnet' ? 'bg-green-400' : 'bg-green-400/50'}`} />
+                  Production
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {newWalletNetwork === 'sandbox' 
+                  ? 'Sandbox wallets are for testing with test MNEE tokens.'
+                  : 'Production wallets handle real MNEE tokens.'
+                }
               </p>
             </div>
           </div>

@@ -1325,3 +1325,22 @@ export const CreditCardIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const MicIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      style={{ color: "currentcolor" }}
+      viewBox="0 0 16 16"
+      width={size}
+    >
+      <path
+        clipRule="evenodd"
+        d="M8 0C6.34315 0 5 1.34315 5 3V8C5 9.65685 6.34315 11 8 11C9.65685 11 11 9.65685 11 8V3C11 1.34315 9.65685 0 8 0ZM6.5 3C6.5 2.17157 7.17157 1.5 8 1.5C8.82843 1.5 9.5 2.17157 9.5 3V8C9.5 8.82843 8.82843 9.5 8 9.5C7.17157 9.5 6.5 8.82843 6.5 8V3ZM3 7.25V8C3 10.7614 5.23858 13 8 13C10.7614 13 13 10.7614 13 8V7.25H14.5V8C14.5 11.3137 12.0376 14.0313 8.75 14.4295V16H7.25V14.4295C3.96243 14.0313 1.5 11.3137 1.5 8V7.25H3Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+};

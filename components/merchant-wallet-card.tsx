@@ -12,6 +12,7 @@ interface MerchantWallet {
   address: string;
   balance: string;
   createdAt: string;
+  network: 'sandbox' | 'mainnet';
 }
 
 interface MerchantWalletCardProps {
@@ -29,6 +30,12 @@ export function MerchantWalletCard({
 }: MerchantWalletCardProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const isProduction = wallet.network === 'mainnet';
+  const networkLabel = isProduction ? 'Production' : 'Sandbox';
+  const networkBadgeClass = isProduction 
+    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -73,9 +80,14 @@ export function MerchantWalletCard({
     <div className="rounded-lg border bg-card p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold" data-testid="merchant-name">
-            {wallet.name}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold" data-testid="merchant-name">
+              {wallet.name}
+            </h3>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${networkBadgeClass}`}>
+              {networkLabel}
+            </span>
+          </div>
           <p className="text-sm text-muted-foreground" data-testid="merchant-description">
             {wallet.description}
           </p>

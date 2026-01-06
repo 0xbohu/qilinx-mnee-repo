@@ -32,6 +32,7 @@ export interface MerchantWalletInfo {
   address: string;
   balance: string;
   createdAt: string;
+  network: 'sandbox' | 'mainnet';
 }
 
 export interface CreateMerchantWalletResult {
@@ -47,7 +48,8 @@ export class MerchantWalletService {
   async createMerchantWallet(
     userId: string,
     name: string,
-    description: string
+    description: string,
+    network: 'sandbox' | 'mainnet' = 'sandbox'
   ): Promise<CreateMerchantWalletResult> {
     // Validate inputs
     if (!isValidMerchantName(name)) {
@@ -85,7 +87,7 @@ export class MerchantWalletService {
       address: wallet.address,
       encryptedPrivateKey: encryptedKey,
       createdAt: new Date().toISOString(),
-      network: 'sandbox',
+      network,
     };
 
     // Add to config
@@ -106,6 +108,7 @@ export class MerchantWalletService {
         address: merchantWallet.address,
         balance: '0.00000',
         createdAt: merchantWallet.createdAt,
+        network: merchantWallet.network,
       },
     };
   }
@@ -122,7 +125,8 @@ export class MerchantWalletService {
       wallets.map(async (wallet) => {
         let balance = '0.00000';
         try {
-          const transferService = createTransferService('sandbox');
+          const environment = wallet.network === 'mainnet' ? 'production' : 'sandbox';
+          const transferService = createTransferService(environment);
           const balanceInfo = await transferService.getBalance(wallet.address);
           balance = formatMneeAmount(balanceInfo.decimalAmount);
         } catch (e) {
@@ -136,6 +140,7 @@ export class MerchantWalletService {
           address: wallet.address,
           balance,
           createdAt: wallet.createdAt,
+          network: wallet.network,
         };
       })
     );
@@ -157,7 +162,8 @@ export class MerchantWalletService {
     // Fetch balance
     let balance = '0.00000';
     try {
-      const transferService = createTransferService('sandbox');
+      const environment = wallet.network === 'mainnet' ? 'production' : 'sandbox';
+      const transferService = createTransferService(environment);
       const balanceInfo = await transferService.getBalance(wallet.address);
       balance = formatMneeAmount(balanceInfo.decimalAmount);
     } catch (e) {
@@ -171,6 +177,7 @@ export class MerchantWalletService {
       address: wallet.address,
       balance,
       createdAt: wallet.createdAt,
+      network: wallet.network,
     };
   }
 
