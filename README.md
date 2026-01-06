@@ -4,6 +4,8 @@ Welcome to the Qilinx MNEE platform documentation. Qilinx is an autonomous agent
 
 **Live Demo:** [https://qilinx-mnee-dashboard.vercel.app/](https://qilinx-mnee-dashboard.vercel.app/)
 
+**Demo Video:** [https://youtu.be/g-CItDWVK3Y](https://youtu.be/g-CItDWVK3Y)
+
 **Documentation:** [https://bo0.gitbook.io/qilinx-mnee/](https://bo0.gitbook.io/qilinx-mnee/)
 
 <figure><img src="https://1192796973-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FnjX1SqrLbXMbnnif6JRT%2Fuploads%2FogAjFTIzg42J8yvAoadT%2FScreenshot%202026-01-05%20at%206.46.22%E2%80%AFPM.png?alt=media&#x26;token=87e6a482-a241-4e7f-b1f9-3aaf045fe2ad" alt=""><figcaption></figcaption></figure>
